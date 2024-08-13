@@ -2,16 +2,26 @@ from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+from slugify import slugify
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from madr.database import get_session
 from madr.models import User
-from madr.schemas import UserPublic, UserSchema
+from madr.schemas import Token, UserPublic, UserSchema
+from madr.security import (
+    create_access_token,
+    get_current_user,
+    get_password_hash,
+    verify_password,
+)
 
 app = FastAPI()
 
 T_Session = Annotated[Session, Depends(get_session)]
+T_OAuth2Form = Annotated[OAuth2PasswordRequestForm, Depends()]
+T_CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 @app.get('/')
@@ -41,7 +51,9 @@ def create_user(user: UserSchema, session: T_Session):
             )
 
     db_user = User(
-        username=user.username, email=user.email, password=user.password
+        username=slugify(user.username, separator=' '),
+        email=user.email,
+        password=get_password_hash(user.password),
     )
 
     session.add(db_user)
@@ -49,3 +61,63 @@ def create_user(user: UserSchema, session: T_Session):
     session.refresh(db_user)
 
     return db_user
+
+
+@app.put('/conta/{user_id}', response_model=UserPublic)
+def update_user(
+    user_id: int,
+    user: UserSchema,
+    session: T_Session,
+    current_user: T_CurrentUser,
+):
+    # verifica se o user que esta tentando mudar é o mesmo que esta logado
+    if current_user.id != user_id:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail='Not enough permission'
+        )
+
+    db_user = session.scalar(
+        select(User).where(
+            (User.username == user.username) | (User.email == user.email)
+        )
+    )
+
+    if db_user:
+        if db_user.username:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail={'Username ja consta no MADR'},
+            )
+        elif db_user.email:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail={'Email ja consta no MADR'},
+            )
+
+    current_user.username = user.username
+    current_user.email = user.email
+    current_user.password = get_password_hash(user.password)
+    session.commit()
+    session.refresh(current_user)
+    return current_user
+
+
+@app.post('/token', response_model=Token)
+def login_for_access_token(session: T_Session, form_data: T_OAuth2Form):
+    user = session.scalar(select(User).where(User.email == form_data.username))
+
+    if not user or not verify_password(form_data.password, user.password):
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail='Incorrect email or password',
+        )
+
+    access_token = create_access_token(data={'sub': user.email})
+
+    return {'access_token': access_token, 'token_type': 'Bearer'}
+
+
+@app.post('/refresh_token', response_model=Token)
+def resfresh_token(user: User = Depends(get_current_user)):
+    new_access_token = create_access_token(data={'sub': user.email})
+    return {'access_token': new_access_token, 'token_type': 'Bearer'}
