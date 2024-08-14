@@ -58,6 +58,22 @@ def user(session):
 
 
 @pytest.fixture
+def other_user(session):
+    password = '321'
+    user = User(
+        username='test1',
+        email='test1@test.com',
+        password=get_password_hash(password),
+    )
+
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    user.clean_password = password
+    return user
+
+
+@pytest.fixture
 def token(client, user):
     response = client.post(
         '/token',
