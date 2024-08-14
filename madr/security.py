@@ -15,7 +15,7 @@ from madr.models import User
 from madr.settings import Settings
 
 pwd_context = PasswordHash.recommended()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/token')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/token')
 
 
 def get_password_hash(password: str):
@@ -64,6 +64,7 @@ def get_current_user(
         raise credentials_exception
 
     user = session.scalar(select(User).where(User.email == username))
+
     if not user:
         raise credentials_exception
 
