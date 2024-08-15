@@ -6,7 +6,7 @@ from sqlalchemy.pool import StaticPool
 
 from madr.app import app
 from madr.database import get_session
-from madr.models import User, table_registry
+from madr.models import Romancista, User, table_registry
 from madr.security import get_password_hash
 
 
@@ -83,3 +83,12 @@ def token(client, user):
         },
     )
     return response.json()['access_token']
+
+
+@pytest.fixture
+def romancista(session):
+    romancista = Romancista(nome='test')
+    session.add(romancista)
+    session.commit()
+    session.refresh(romancista)
+    return romancista

@@ -21,3 +21,11 @@ class Token(BaseModel):
 
 class Message(BaseModel):
     message: str
+
+
+class RomancistaSchema(BaseModel):
+    nome: str
+
+
+class RomancistaPublic(RomancistaSchema):
+    id: int
