@@ -6,7 +6,7 @@ from sqlalchemy.pool import StaticPool
 
 from madr.app import app
 from madr.database import get_session
-from madr.models import Romancista, User, table_registry
+from madr.models import Livro, Romancista, User, table_registry
 from madr.security import get_password_hash
 
 
@@ -92,3 +92,32 @@ def romancista(session):
     session.commit()
     session.refresh(romancista)
     return romancista
+
+
+@pytest.fixture
+def other_romancista(session):
+    other_romancista = Romancista(nome='test1')
+    session.add(other_romancista)
+    session.commit()
+    session.refresh(other_romancista)
+    return other_romancista
+
+
+@pytest.fixture
+def livro(session):
+    livro = Livro(
+        ano=1999, titulo='o mundo assombrado pelos demônios', romancista_id=1
+    )
+    session.add(livro)
+    session.commit()
+
+    return livro
+
+
+@pytest.fixture
+def other_livro(session):
+    livro = Livro(ano=1999, titulo='otherlivrotitulo', romancista_id=1)
+    session.add(livro)
+    session.commit()
+
+    return livro

@@ -5,7 +5,7 @@ def test_create_user(client):
     response = client.post(
         '/users/conta',
         json={
-            'username': 'tEst UsErnAmE @!',
+            'username': 'tEst UsErnAmE@!',
             'email': 'test@test.com',
             'password': 'password',
         },
@@ -54,6 +54,26 @@ def test_update_user(client, user, token):
         json={
             'id': user.id,
             'username': 'test2',
+            'email': 'test2@test.com',
+            'password': '123',
+        },
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'id': user.id,
+        'username': 'test2',
+        'email': 'test2@test.com',
+    }
+
+
+def test_update_user_sanitized(client, user, token):
+    response = client.put(
+        f'/users/conta/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+        json={
+            'id': user.id,
+            'username': 'TesT2!!!!!!',
             'email': 'test2@test.com',
             'password': '123',
         },

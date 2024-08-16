@@ -67,7 +67,7 @@ def update_user(
         )
 
     try:
-        current_user.username = user.username
+        current_user.username = slugify(user.username, separator=' ')
         current_user.email = user.email
         current_user.password = get_password_hash(user.password)
 
