@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+from tests.conftest import LivroFactory
+
 
 def test_create_livro(client, token):
     response = client.post(
@@ -158,3 +160,32 @@ def test_list_livro_empty(client, livro):
     response = client.get('/livro/?ano=8')
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {'livros': []}
+
+
+def test_list_livro_should_return_3_livros(session, client, token):
+    expected_livros = 3
+    session.bulk_save_objects(LivroFactory.create_batch(3))
+    session.commit()
+    response = client.get(
+        '/livro', headers={'Authorization': f'Bearer {token}'}
+    )
+    assert len(response.json()['livros']) == expected_livros
+
+
+def test_list_livro_offset(session, client, token):
+    session.bulk_save_objects(LivroFactory.create_batch(5))
+    session.commit()
+    response = client.get(
+        '/livro/?offset=1', headers={'Authorization': f'Bearer {token}'}
+    )
+    assert response.json()['livros'][0]['id'] != 1
+
+
+def test_list_livro_limit_20(session, client, token):
+    expected_livros = 20
+    session.bulk_save_objects(LivroFactory.create_batch(21))
+    session.commit()
+    response = client.get(
+        '/livro', headers={'Authorization': f'Bearer {token}'}
+    )
+    assert len(response.json()['livros']) == expected_livros

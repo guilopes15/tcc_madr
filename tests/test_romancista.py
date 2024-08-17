@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+from tests.conftest import RomancistaFactory
+
 
 def test_create_romancista(client, token):
     response = client.post(
@@ -111,3 +113,32 @@ def test_list_romancista_should_return_empty(client, romancista):
     response = client.get('/romancista/?nome=w')
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {'romancistas': []}
+
+
+def test_list_romancista_should_return_3_romancistas(session, client, token):
+    expected_romancistas = 3
+    session.bulk_save_objects(RomancistaFactory.create_batch(3))
+    session.commit()
+    response = client.get(
+        '/romancista', headers={'Authorization': f'Bearer {token}'}
+    )
+    assert len(response.json()['romancistas']) == expected_romancistas
+
+
+def test_list_romancista_offset(session, client, token):
+    session.bulk_save_objects(RomancistaFactory.create_batch(5))
+    session.commit()
+    response = client.get(
+        '/romancista/?offset=1', headers={'Authorization': f'Bearer {token}'}
+    )
+    assert response.json()['romancistas'][0]['id'] != 1
+
+
+def test_list_romancista_limit_20(session, client, token):
+    expected_romancistas = 20
+    session.bulk_save_objects(RomancistaFactory.create_batch(21))
+    session.commit()
+    response = client.get(
+        '/romancista', headers={'Authorization': f'Bearer {token}'}
+    )
+    assert len(response.json()['romancistas']) == expected_romancistas

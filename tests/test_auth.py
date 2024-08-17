@@ -13,6 +13,15 @@ def test_get_token(client, user):
     assert 'token_type' in token
 
 
+def test_toekn_inexistente_user(client):
+    response = client.post(
+        '/auth/token',
+        data={'username': 'invalid@user.com', 'password': 'test123'},
+    )
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {'detail': 'Incorrect email or password'}
+
+
 def test_get_token_with_wrong_password(client, user):
     response = client.post(
         '/auth/token',

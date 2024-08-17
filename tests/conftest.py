@@ -1,3 +1,6 @@
+import random
+
+import factory
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -8,6 +11,22 @@ from madr.app import app
 from madr.database import get_session
 from madr.models import Livro, Romancista, User, table_registry
 from madr.security import get_password_hash
+
+
+class RomancistaFactory(factory.Factory):
+    class Meta:
+        model = Romancista
+
+    nome = factory.Sequence(lambda n: f'nome={n}')
+
+
+class LivroFactory(factory.Factory):
+    class Meta:
+        model = Livro
+
+    ano = factory.LazyFunction(lambda: random.randint(1500, 2024))
+    titulo = factory.Sequence(lambda n: f'titulo={n}')
+    romancista_id = 1
 
 
 @pytest.fixture(scope='session')
