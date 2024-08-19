@@ -3,7 +3,7 @@ from http import HTTPStatus
 from tests.conftest import LivroFactory
 
 
-def test_create_livro(client, token):
+def test_create_livro(client, token, romancista):
     response = client.post(
         '/livro',
         headers={'Authorization': f'Bearer {token}'},
@@ -19,18 +19,18 @@ def test_create_livro(client, token):
         'id': 1,
         'ano': 1999,
         'titulo': 'cafe da manha dos campeoes',
-        'romancista_id': 1,
+        'romancista_id': romancista.id,
     }
 
 
-def test_create_livro_already_existent(client, token, livro):
+def test_create_livro_already_existent(client, token, livro, romancista):
     response = client.post(
         '/livro',
         headers={'Authorization': f'Bearer {token}'},
         json={
             'ano': 1999,
             'titulo': 'o mundo assombrado pelos demônios',
-            'romancista_id': 1,
+            'romancista_id': romancista.id,
         },
     )
 
@@ -142,7 +142,7 @@ def test_get_livro_by_id_not_found(client, livro):
 
 
 def test_list_livro(client, livro):
-    response = client.get('/livro/?ano=9&titulo=o')
+    response = client.get('/livro/?ano=1999&titulo=o')
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
         'livros': [
@@ -162,30 +162,27 @@ def test_list_livro_empty(client, livro):
     assert response.json() == {'livros': []}
 
 
-def test_list_livro_should_return_3_livros(session, client, token):
+def test_list_livro_should_return_3_livros(session, client, romancista):
     expected_livros = 3
     session.bulk_save_objects(LivroFactory.create_batch(3))
     session.commit()
-    response = client.get(
-        '/livro', headers={'Authorization': f'Bearer {token}'}
-    )
+    response = client.get('/livro')
     assert len(response.json()['livros']) == expected_livros
 
 
-def test_list_livro_offset(session, client, token):
+def test_list_livro_offset(session, client, romancista):
     session.bulk_save_objects(LivroFactory.create_batch(5))
     session.commit()
-    response = client.get(
-        '/livro/?offset=1', headers={'Authorization': f'Bearer {token}'}
-    )
-    assert response.json()['livros'][0]['id'] != 1
+    response = client.get('/livro/?offset=1')
+    response_data = response.json()['livros']
+    livros_id_1 = [livro['id'] == 1 for livro in response_data]
+
+    assert not any(livros_id_1)
 
 
-def test_list_livro_limit_20(session, client, token):
+def test_list_livro_limit_20(session, client, romancista):
     expected_livros = 20
     session.bulk_save_objects(LivroFactory.create_batch(21))
     session.commit()
-    response = client.get(
-        '/livro', headers={'Authorization': f'Bearer {token}'}
-    )
+    response = client.get('/livro')
     assert len(response.json()['livros']) == expected_livros

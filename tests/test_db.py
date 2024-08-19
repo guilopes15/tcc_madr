@@ -21,9 +21,11 @@ def test_create_romancista_on_db(session):
     assert result
 
 
-def teste_create_livro_on_db(session):
+def teste_create_livro_on_db(session, romancista):
     livro = Livro(
-        ano=1999, titulo='o mundo assombrado pelos demônios', romancista_id=1
+        ano=1999,
+        titulo='o mundo assombrado pelos demônios',
+        romancista_id=romancista.id,
     )
     session.add(livro)
     session.commit()

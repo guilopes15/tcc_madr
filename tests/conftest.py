@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from sqlalchemy.pool import StaticPool
+from testcontainers.postgres import PostgresContainer
 
 from madr.app import app
 from madr.database import get_session
@@ -31,13 +31,10 @@ class LivroFactory(factory.Factory):
 
 @pytest.fixture(scope='session')
 def engine():
-    engine = create_engine(
-        'sqlite:///:memory:',
-        connect_args={'check_same_thread': False},
-        poolclass=StaticPool,
-    )
-    with engine.begin():
-        yield engine
+    with PostgresContainer('postgres:16', driver='psycopg2') as postgres:
+        engine = create_engine(postgres.get_connection_url())
+        with engine.begin():
+            yield engine
 
 
 @pytest.fixture
@@ -123,9 +120,11 @@ def other_romancista(session):
 
 
 @pytest.fixture
-def livro(session):
+def livro(session, romancista):
     livro = Livro(
-        ano=1999, titulo='o mundo assombrado pelos demônios', romancista_id=1
+        ano=1999,
+        titulo='o mundo assombrado pelos demônios',
+        romancista_id=romancista.id,
     )
     session.add(livro)
     session.commit()
@@ -134,8 +133,10 @@ def livro(session):
 
 
 @pytest.fixture
-def other_livro(session):
-    livro = Livro(ano=1999, titulo='otherlivrotitulo', romancista_id=1)
+def other_livro(session, romancista):
+    livro = Livro(
+        ano=1999, titulo='otherlivrotitulo', romancista_id=romancista.id
+    )
     session.add(livro)
     session.commit()
 

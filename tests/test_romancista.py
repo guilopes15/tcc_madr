@@ -115,30 +115,24 @@ def test_list_romancista_should_return_empty(client, romancista):
     assert response.json() == {'romancistas': []}
 
 
-def test_list_romancista_should_return_3_romancistas(session, client, token):
+def test_list_romancista_should_return_3_romancistas(session, client):
     expected_romancistas = 3
     session.bulk_save_objects(RomancistaFactory.create_batch(3))
     session.commit()
-    response = client.get(
-        '/romancista', headers={'Authorization': f'Bearer {token}'}
-    )
+    response = client.get('/romancista')
     assert len(response.json()['romancistas']) == expected_romancistas
 
 
-def test_list_romancista_offset(session, client, token):
+def test_list_romancista_offset(session, client):
     session.bulk_save_objects(RomancistaFactory.create_batch(5))
     session.commit()
-    response = client.get(
-        '/romancista/?offset=1', headers={'Authorization': f'Bearer {token}'}
-    )
+    response = client.get('/romancista/?offset=1')
     assert response.json()['romancistas'][0]['id'] != 1
 
 
-def test_list_romancista_limit_20(session, client, token):
+def test_list_romancista_limit_20(session, client):
     expected_romancistas = 20
     session.bulk_save_objects(RomancistaFactory.create_batch(21))
     session.commit()
-    response = client.get(
-        '/romancista', headers={'Authorization': f'Bearer {token}'}
-    )
+    response = client.get('/romancista')
     assert len(response.json()['romancistas']) == expected_romancistas

@@ -119,7 +119,7 @@ def list_livro(
     query = select(Livro)
 
     if ano:
-        query = query.filter(Livro.ano.contains(ano))
+        query = query.where(Livro.ano == ano)
 
     if titulo:
         query = query.filter(Livro.titulo.contains(titulo))
