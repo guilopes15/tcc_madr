@@ -30,7 +30,7 @@ def test_create_user_with_username_already_existent(client, user):
     )
 
     response.status_code == HTTPStatus.BAD_REQUEST
-    response.json() == {'detail': 'Username alread exists'}
+    response.json() == {'detail': 'Username ja existi'}
 
 
 def test_create_user_with_email_already_existent(client, user):
@@ -44,7 +44,7 @@ def test_create_user_with_email_already_existent(client, user):
     )
 
     response.status_code == HTTPStatus.BAD_REQUEST
-    response.json() == {'detail': 'Email alread exists'}
+    response.json() == {'detail': 'Email ja existi'}
 
 
 def test_update_user(client, user, token):
@@ -101,7 +101,7 @@ def test_update_user_with_invalid_id(client, token, other_user):
     )
 
     response.status_code == HTTPStatus.FORBIDDEN
-    response.json() == {'detail': 'Not enough permission'}
+    response.json() == {'detail': 'Sem permissao'}
 
 
 def test_update_user_with_username_or_email_already_exists(
@@ -120,7 +120,7 @@ def test_update_user_with_username_or_email_already_exists(
     )
 
     assert response.status_code == HTTPStatus.CONFLICT
-    assert response.json() == {'detail': 'username or email already exists'}
+    assert response.json() == {'detail': 'username ou email ja existi'}
 
 
 def test_delete_user(client, user, token):
@@ -138,4 +138,4 @@ def test_delete_other_user(client, token):
     )
 
     response.status_code == HTTPStatus.FORBIDDEN
-    response.json() == {'detail': 'Not enough permission'}
+    response.json() == {'detail': 'Sem permissao'}

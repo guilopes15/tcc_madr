@@ -32,13 +32,13 @@ def create_user(user: UserSchema, session: T_Session):
         if db_user.username == user.username:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
-                detail='Username alread exists',
+                detail='Username ja existi',
             )
 
         elif db_user.email == user.email:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
-                detail='Email alread exists',
+                detail='Email ja existi',
             )
 
     db_user = User(
@@ -63,7 +63,7 @@ def update_user(
 ):
     if current_user.id != user_id:
         raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN, detail='Not enough permission'
+            status_code=HTTPStatus.FORBIDDEN, detail='Sem permissao'
         )
 
     try:
@@ -77,7 +77,7 @@ def update_user(
     except IntegrityError:
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT,
-            detail='username or email already exists',
+            detail='username ou email ja existi',
         )
 
     return current_user
@@ -87,7 +87,7 @@ def update_user(
 def delete_user(user_id: int, session: T_Session, current_user: T_CurrentUser):
     if current_user.id != user_id:
         raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN, detail='Not enough permission'
+            status_code=HTTPStatus.FORBIDDEN, detail='Sem permissao'
         )
     session.delete(current_user)
     session.commit()

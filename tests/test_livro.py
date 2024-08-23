@@ -35,7 +35,7 @@ def test_create_livro_already_existent(client, token, livro, romancista):
     )
 
     assert response.status_code == HTTPStatus.CONFLICT
-    assert response.json() == {'detail': 'livro ja consta no MADR'}
+    assert response.json() == {'detail': 'Livro ja consta no MADR'}
 
 
 def test_delete_livro(client, token, livro):

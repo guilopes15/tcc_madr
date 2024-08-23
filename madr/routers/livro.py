@@ -30,7 +30,7 @@ def create_livro(livro: LivroSchema, session: T_Session, user: T_CurrentUser):
     )
     if db_livro:
         raise HTTPException(
-            status_code=HTTPStatus.CONFLICT, detail='livro ja consta no MADR'
+            status_code=HTTPStatus.CONFLICT, detail='Livro ja consta no MADR'
         )
 
     db_livro = Livro(

@@ -1,4 +1,4 @@
-## O que é o MADR?
+# O que é o MADR?
 
 Madr ou Meu Acervo Digital de Romances é uma **API** para gestao de livros. Este projeto surgiu como tcc do curso [FastZero](https://fastapidozero.dunossauro.com/#pre-requisitos), disponibilizado pelo [Dunossauro](https://github.com/dunossauro).
 
@@ -30,6 +30,7 @@ Antes de tudo instale o [python](https://www.python.org/downloads/) e o [docker]
 
 
 É preciso também criar um arquivo **`.env`** na raiz do projeto com as seguintes variaveis:
+
 ```plaintext
 DATABASE_URL="postgresql+psycopg2://app_user:app_password@localhost:5432/app_db"
 SECRET_KEY="your-secret-key"
@@ -39,7 +40,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 
 
 
-Depois com o terminal aberto, navegue até a pasta raiz (pasta onde fica o pyproject.toml) e execute:
+Com o terminal aberto, navegue até a pasta raiz (pasta onde fica o pyproject.toml) e execute:
 
 ```bash
 docker compose up --build
@@ -66,6 +67,7 @@ hearders={'Authorization': 'Bearer {token}'}
 
 #### Auth
 * ***Token JWT***
+
 É preciso ter o token jwt do tipo Bearer para realizar a autentificação, então faça um post no seguinte endpoint:
 > POST /auth/token
 ```json       
@@ -75,11 +77,12 @@ hearders={'Authorization': 'Bearer {token}'}
 }
 ```
 * ***Refresh Token*** - *login required*
-O token expira em 60 minutos, então faça um post no endpoint abaixo, antes do tempo expirar, para permanecer utilizando a aplicação:
+
+O token expira em 60 minutos, então faça um post no endpoint abaixo antes do tempo expirar, para permanecer utilizando a aplicação:
 >POST /auth/refresh_token'
 
 #### Users
-* ***Criação de usuario***
+* ***Criar usuario***
 > POST /users/conta
 ```json
 {
@@ -103,14 +106,13 @@ O token expira em 60 minutos, então faça um post no endpoint abaixo, antes do 
 ```
 #### Romancista
 
-* ***Criação de Romancista*** - *login required*
+* ***Criar Romancista*** - *login required*
 > POST /romancista
 ```json
 {
-    {'nome': 'test'}
+    'nome': 'test'
 }
 ```
-
 
 * ***Deletar Romancista*** - *login required*
 > DELETE /romancista/`{romancista.id}`
@@ -119,7 +121,7 @@ O token expira em 60 minutos, então faça um post no endpoint abaixo, antes do 
 > PATCH /romancista/`{romancista.id}`
 ```json
 {
-    {'nome': 'testtest'}
+    'nome': 'testtest'
 }
 ```
 
@@ -132,10 +134,9 @@ O token expira em 60 minutos, então faça um post no endpoint abaixo, antes do 
 > GET /romancista/?nome=t
 
 
-
 #### Livro
 
-* ***Criação de livro*** - *login required*
+* ***Criar livro*** - *login required*
 > POST /livro
 ```json
 {
@@ -159,5 +160,3 @@ O token expira em 60 minutos, então faça um post no endpoint abaixo, antes do 
 
 * ***Listar livro por queryparam***
 >GET /livro/?ano=1999&titulo=cafe
-
-
