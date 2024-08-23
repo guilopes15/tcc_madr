@@ -44,7 +44,7 @@ def test_get_token_with_wrong_email(client, user):
     assert response.json() == {'detail': 'Incorrect email or password'}
 
 
-def test_resfresh_token(client, token):
+def test_refresh_token(client, token):
     response = client.post(
         '/auth/refresh_token',
         headers={
@@ -82,7 +82,7 @@ def test_token_expired_after_time(client, user):
         assert response.json() == {'detail': 'Could not validate credentials'}
 
 
-def test_token_expired_dont_resfresh(client, user):
+def test_token_expired_dont_refresh(client, user):
     with freeze_time('2024-08-19 12:00:00'):
         response = client.post(
             '/auth/token',
