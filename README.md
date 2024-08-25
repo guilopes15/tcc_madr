@@ -11,9 +11,11 @@ Neste projeto decidi utilizar a mesma estrutura do curso fastzero, por ser o meu
  * Utilizei o **psycopg2** porque tive um problema com  o "psycopg[binary]" ao aplicar a migração dentro do conteiner do flyio. 
 <br>
     
-    TypeError: cannot use a string pattern on a bytes-like object.
+`TypeError: cannot use a string pattern on a bytes-like object.`
 
-O erro foi resolvido ao utilizar o psycopg2. Obs: quem souber o por que do erro e quiser abrir uma issue, desde ja agradeço.
+Obs: Pesquisando um pouco sobre, parece que é um erro de encoding. Um dos meus models tem um caractere especial ou acento, no caso 'romancista_id'.
+
+Quem souber explicar melhor e quiser abrir uma issue, desde já agradeço.
 
 ```bash
 poetry add psycopg2-binary
@@ -70,7 +72,7 @@ hearders={'Authorization': 'Bearer {token}'}
 
 É preciso ter o token jwt do tipo Bearer para realizar a autentificação, então faça um post no seguinte endpoint:
 > POST /auth/token
-```json       
+```       
 {
     'username': 'test@test.com', 
     'password': 'password'
@@ -84,7 +86,7 @@ O token expira em 60 minutos, então faça um post no endpoint abaixo antes do t
 #### Users
 * ***Criar usuario***
 > POST /users/conta
-```json
+```
 {
     'username': 'testusername',
     'email': 'test@test.com',
@@ -96,7 +98,7 @@ O token expira em 60 minutos, então faça um post no endpoint abaixo antes do t
 
 * ***Atualizar usuario*** - *login required*
 > UPDATE /users/conta/`{user.id}`
-```json
+```
 {           
     'id': 1,
     'username': 'test2',
@@ -108,7 +110,7 @@ O token expira em 60 minutos, então faça um post no endpoint abaixo antes do t
 
 * ***Criar Romancista*** - *login required*
 > POST /romancista
-```json
+```
 {
     'nome': 'test'
 }
@@ -119,7 +121,7 @@ O token expira em 60 minutos, então faça um post no endpoint abaixo antes do t
 
 * ***Atualizar romancista*** - *login required*
 > PATCH /romancista/`{romancista.id}`
-```json
+```
 {
     'nome': 'testtest'
 }
@@ -138,7 +140,7 @@ O token expira em 60 minutos, então faça um post no endpoint abaixo antes do t
 
 * ***Criar livro*** - *login required*
 > POST /livro
-```json
+```
 {
     'ano': 1999,
     'titulo': 'café da manhã dos campeões',
@@ -149,7 +151,7 @@ O token expira em 60 minutos, então faça um post no endpoint abaixo antes do t
 > DELETE /livro/`{livro.id}`
 * ***Atualizar livro*** - *login required*
 > PATCH /livro/`{livro.id}`
-```json
+```
 {
     'ano': 1958,
     'titulo': 'testnomelivro'
