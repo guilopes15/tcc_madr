@@ -9,8 +9,7 @@ Neste projeto decidi utilizar a mesma estrutura do curso fastzero, por ser o meu
 #### Bibliotecas fora do escopo do curso
  
  * Utilizei o **psycopg2** porque tive um problema com  o "psycopg[binary]" ao aplicar a migração dentro do conteiner do flyio. 
-<br>
-    
+   
 `TypeError: cannot use a string pattern on a bytes-like object.`
 
 Obs: Pesquisando um pouco sobre, parece que é um erro de encoding. Um dos meus models tem um caractere especial ou acento, no caso 'romancista_id'.

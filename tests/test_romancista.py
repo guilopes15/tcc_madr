@@ -127,7 +127,9 @@ def test_list_romancista_offset(session, client):
     session.bulk_save_objects(RomancistaFactory.create_batch(5))
     session.commit()
     response = client.get('/romancista/?offset=1')
-    assert response.json()['romancistas'][0]['id'] != 1
+    response_data = response.json()['romancistas']
+    romancista_id_1 = [romancista['id'] == 1 for romancista in response_data]
+    assert not any(romancista_id_1)
 
 
 def test_list_romancista_limit_20(session, client):
