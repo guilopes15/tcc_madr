@@ -4,8 +4,18 @@ import pytest
 from fastapi import HTTPException
 from jwt import decode, encode
 
-from madr.security import create_access_token, get_current_user
+from madr.security import (
+    create_access_token,
+    get_current_user,
+    get_password_hash,
+    verify_password,
+)
 from madr.settings import Settings
+
+
+def test_password_checker():
+    password_hash = get_password_hash('test')
+    assert verify_password('test', password_hash)
 
 
 def test_jwt():

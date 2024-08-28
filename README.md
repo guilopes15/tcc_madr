@@ -1,20 +1,16 @@
 # O que é o MADR?
 
-Madr ou Meu Acervo Digital de Romances é uma **API** para gestao de livros. Este projeto surgiu como tcc do curso [FastZero](https://fastapidozero.dunossauro.com/#pre-requisitos), disponibilizado pelo [Dunossauro](https://github.com/dunossauro).
+Madr ou Meu Acervo Digital de Romances é uma **API** para gestão de livros. Este projeto surgiu como tcc do curso [FastZero](https://fastapidozero.dunossauro.com/#pre-requisitos), disponibilizado pelo [Dunossauro](https://github.com/dunossauro).
 
 #### Observações iniciais
 
-Neste projeto decidi utilizar a mesma estrutura do curso fastzero, por ser o meu primeiro projeto com o framework [FastAPI](https://fastapi.tiangolo.com/). Também pensei em usar o [FastAPIUsers](https://fastapi-users.github.io/fastapi-users/latest/) mas achei que nao daria tempo de aprender até o fim de agosto.
+Neste projeto decidi utilizar a mesma estrutura do curso fastzero, por ser o meu primeiro projeto com o framework [FastAPI](https://fastapi.tiangolo.com/). Também pensei em usar o [FastAPIUsers](https://fastapi-users.github.io/fastapi-users/latest/) mas achei que não daria tempo de aprender até o fim de agosto.
 
 #### Bibliotecas fora do escopo do curso
  
  * Utilizei o **psycopg2** porque tive um problema com  o "psycopg[binary]" ao aplicar a migração dentro do conteiner do flyio. 
    
 `TypeError: cannot use a string pattern on a bytes-like object.`
-
-Obs: Pesquisando um pouco sobre, parece que é um erro de encoding. Um dos meus models tem um caractere especial ou acento, no caso 'romancista_id'.
-
-Quem souber explicar melhor e quiser abrir uma issue, desde já agradeço.
 
 ```bash
 poetry add psycopg2-binary
@@ -30,7 +26,7 @@ poetry add python-slugify
 Antes de tudo instale o [python](https://www.python.org/downloads/) e o [docker](https://docs.docker.com/engine/install/) na máquina.
 
 
-É preciso também criar um arquivo **`.env`** na raiz do projeto com as seguintes variaveis:
+É preciso também criar um arquivo **`.env`** na raiz do projeto(pasta onde fica o pyproject.toml) com as seguintes variaveis:
 
 ```plaintext
 DATABASE_URL="postgresql+psycopg2://app_user:app_password@localhost:5432/app_db"
@@ -39,9 +35,7 @@ ALGORITHM="HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 ```
 
-
-
-Com o terminal aberto, navegue até a pasta raiz (pasta onde fica o pyproject.toml) e execute:
+Depois execute:
 
 ```bash
 docker compose up --build

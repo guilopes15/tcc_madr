@@ -175,9 +175,9 @@ def test_list_livro_offset(session, client, romancista):
     session.commit()
     response = client.get('/livro/?offset=1')
     response_data = response.json()['livros']
-    livros_id_1 = [livro['id'] == 1 for livro in response_data]
+    livro_id_1 = [livro['id'] == 1 for livro in response_data]
 
-    assert not any(livros_id_1)
+    assert not any(livro_id_1)
 
 
 def test_list_livro_limit_20(session, client, romancista):
