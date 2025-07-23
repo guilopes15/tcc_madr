@@ -15,7 +15,7 @@ pwdlib = {extras = ["argon2"], version = "^0.2.0"}
 python-slugify = "^8.0.4"
 python-multipart = "^0.0.9"
 alembic = "^1.13.2"
-psycopg = {extras = ["binary"], version = "^3.2.1"}
+psycopg = {extras = ["binary"], version = "^3.2.9"}
 
 
 [tool.poetry.group.dev.dependencies]
