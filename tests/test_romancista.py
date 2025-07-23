@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+import pytest
+
 from tests.conftest import RomancistaFactory
 
 
@@ -115,26 +117,29 @@ def test_list_romancista_should_return_empty(client, romancista):
     assert response.json() == {'romancistas': []}
 
 
-def test_list_romancista_should_return_3_romancistas(session, client):
+@pytest.mark.asyncio
+async def test_list_romancista_should_return_3_romancistas(session, client):
     expected_romancistas = 3
-    session.bulk_save_objects(RomancistaFactory.create_batch(3))
-    session.commit()
+    session.add_all(RomancistaFactory.create_batch(3))
+    await session.commit()
     response = client.get('/romancista')
     assert len(response.json()['romancistas']) == expected_romancistas
 
 
-def test_list_romancista_offset(session, client):
-    session.bulk_save_objects(RomancistaFactory.create_batch(5))
-    session.commit()
+@pytest.mark.asyncio
+async def test_list_romancista_offset(session, client):
+    session.add_all(RomancistaFactory.create_batch(5))
+    await session.commit()
     response = client.get('/romancista/?offset=1')
     response_data = response.json()['romancistas']
     romancista_id_1 = [romancista['id'] == 1 for romancista in response_data]
     assert not any(romancista_id_1)
 
 
-def test_list_romancista_limit_20(session, client):
+@pytest.mark.asyncio
+async def test_list_romancista_limit_20(session, client):
     expected_romancistas = 20
-    session.bulk_save_objects(RomancistaFactory.create_batch(21))
-    session.commit()
+    session.add_all(RomancistaFactory.create_batch(21))
+    await session.commit()
     response = client.get('/romancista')
     assert len(response.json()['romancistas']) == expected_romancistas

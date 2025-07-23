@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from slugify import slugify
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from madr.database import get_session
 from madr.models import Romancista, User
@@ -19,7 +19,7 @@ from madr.schemas import (
 from madr.security import get_current_user
 
 T_CurrentUser = Annotated[User, Depends(get_current_user)]
-T_Session = Annotated[Session, Depends(get_session)]
+T_Session = Annotated[AsyncSession, Depends(get_session)]
 
 
 router = APIRouter(prefix='/romancista', tags=['romancista'])
@@ -28,12 +28,12 @@ router = APIRouter(prefix='/romancista', tags=['romancista'])
 @router.post(
     '/', status_code=HTTPStatus.CREATED, response_model=RomancistaPublic
 )
-def create_romancista(
+async def create_romancista(
     romancista: RomancistaSchema,
     user: T_CurrentUser,
     session: T_Session,
 ):
-    db_romancista = session.scalar(
+    db_romancista = await session.scalar(
         select(Romancista).where(Romancista.nome == romancista.nome)
     )
 
@@ -45,8 +45,8 @@ def create_romancista(
 
     db_romancista = Romancista(nome=slugify(romancista.nome, separator=' '))
     session.add(db_romancista)
-    session.commit()
-    session.refresh(db_romancista)
+    await session.commit()
+    await session.refresh(db_romancista)
 
     return db_romancista
 
@@ -56,10 +56,10 @@ def create_romancista(
     status_code=HTTPStatus.OK,
     response_model=Message,
 )
-def delete_romancista(
+async def delete_romancista(
     romancista_id: int, user: T_CurrentUser, session: T_Session
 ):
-    romancista = session.scalar(
+    romancista = await session.scalar(
         select(Romancista).where(Romancista.id == romancista_id)
     )
 
@@ -69,8 +69,8 @@ def delete_romancista(
             detail='Romancista nao consta no MADR',
         )
 
-    session.delete(romancista)
-    session.commit()
+    await session.delete(romancista)
+    await session.commit()
 
     return {'message': 'Romancista deletado(a) do MADR'}
 
@@ -80,13 +80,13 @@ def delete_romancista(
     status_code=HTTPStatus.OK,
     response_model=RomancistaPublic,
 )
-def patch_romancista(
+async def patch_romancista(
     romancista_id: int,
     user: T_CurrentUser,
     session: T_Session,
     romancista: RomancistaUpdate,
 ):
-    db_romancista = session.scalar(
+    db_romancista = await session.scalar(
         select(Romancista).where(Romancista.id == romancista_id)
     )
 
@@ -102,8 +102,8 @@ def patch_romancista(
 
         db_romancista.nome = slugify(db_romancista.nome, separator=' ')
         session.add(db_romancista)
-        session.commit()
-        session.refresh(db_romancista)
+        await session.commit()
+        await session.refresh(db_romancista)
 
     except IntegrityError:
         raise HTTPException(
@@ -119,8 +119,8 @@ def patch_romancista(
     status_code=HTTPStatus.OK,
     response_model=RomancistaPublic,
 )
-def get_romancista(romancista_id: int, session: T_Session):
-    db_romancista = session.scalar(
+async def get_romancista(romancista_id: int, session: T_Session):
+    db_romancista = await session.scalar(
         select(Romancista).where(Romancista.id == romancista_id)
     )
     if not db_romancista:
@@ -133,7 +133,7 @@ def get_romancista(romancista_id: int, session: T_Session):
 
 
 @router.get('/', status_code=HTTPStatus.OK, response_model=RomancistaList)
-def list_romancista(
+async def list_romancista(
     session: T_Session,
     nome: str | None = None,
     offset: int | None = None,
@@ -144,6 +144,6 @@ def list_romancista(
     if nome:
         query = query.filter(Romancista.nome.contains(nome))
 
-    list_romancistas = session.scalars(query.offset(offset).limit(limit)).all()
+    list_romancistas = await session.scalars(query.offset(offset).limit(limit))
 
-    return {'romancistas': list_romancistas}
+    return {'romancistas': list_romancistas.all()}

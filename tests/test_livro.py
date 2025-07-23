@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+import pytest
+
 from tests.conftest import LivroFactory
 
 
@@ -162,17 +164,19 @@ def test_list_livro_empty(client, livro):
     assert response.json() == {'livros': []}
 
 
-def test_list_livro_should_return_3_livros(session, client, romancista):
+@pytest.mark.asyncio
+async def test_list_livro_should_return_3_livros(session, client, romancista):
     expected_livros = 3
-    session.bulk_save_objects(LivroFactory.create_batch(3))
-    session.commit()
+    session.add_all(LivroFactory.create_batch(3))
+    await session.commit()
     response = client.get('/livro')
     assert len(response.json()['livros']) == expected_livros
 
 
-def test_list_livro_offset(session, client, romancista):
-    session.bulk_save_objects(LivroFactory.create_batch(5))
-    session.commit()
+@pytest.mark.asyncio
+async def test_list_livro_offset(session, client, romancista):
+    session.add_all(LivroFactory.create_batch(5))
+    await session.commit()
     response = client.get('/livro/?offset=1')
     response_data = response.json()['livros']
     livro_id_1 = [livro['id'] == 1 for livro in response_data]
@@ -180,9 +184,10 @@ def test_list_livro_offset(session, client, romancista):
     assert not any(livro_id_1)
 
 
-def test_list_livro_limit_20(session, client, romancista):
+@pytest.mark.asyncio
+async def test_list_livro_limit_20(session, client, romancista):
     expected_livros = 20
-    session.bulk_save_objects(LivroFactory.create_batch(21))
-    session.commit()
+    session.add_all(LivroFactory.create_batch(21))
+    await session.commit()
     response = client.get('/livro')
     assert len(response.json()['livros']) == expected_livros

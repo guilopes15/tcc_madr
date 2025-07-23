@@ -4,19 +4,11 @@ Madr ou Meu Acervo Digital de Romances é uma **API** para gestão de livros. Es
 
 #### Observações iniciais
 
-Neste projeto decidi utilizar a mesma estrutura do curso fastzero, por ser o meu primeiro projeto com o framework [FastAPI](https://fastapi.tiangolo.com/). Também pensei em usar o [FastAPIUsers](https://fastapi-users.github.io/fastapi-users/latest/) mas achei que não daria tempo de aprender até o fim de agosto.
+Neste projeto decidi utilizar a mesma estrutura do curso fastzero, por ser o meu primeiro projeto com o framework [FastAPI](https://fastapi.tiangolo.com/). 
 
 #### Bibliotecas fora do escopo do curso
- 
- * Utilizei o **psycopg2** porque tive um problema com  o "psycopg[binary]" ao aplicar a migração dentro do conteiner do flyio. 
-   
-`TypeError: cannot use a string pattern on a bytes-like object.`
 
-```bash
-poetry add psycopg2-binary
-```
-
- * Para sanitizar os nomes usei o **python-slugify**, esta biblioteca limpa os caracteres especiais, letras maiusculas e os acentos.  
+* Para sanitizar os nomes usei o **python-slugify**, esta biblioteca limpa os caracteres especiais, letras maiusculas, acentuação e etc.  
 
 ```bash
 poetry add python-slugify
@@ -29,7 +21,7 @@ Antes de tudo instale o [python](https://www.python.org/downloads/) e o [docker]
 É preciso também criar um arquivo **`.env`** na raiz do projeto(pasta onde fica o pyproject.toml) com as seguintes variaveis:
 
 ```plaintext
-DATABASE_URL="postgresql+psycopg2://app_user:app_password@localhost:5432/app_db"
+DATABASE_URL="postgresql+psycopg://app_user:app_password@localhost:5432/app_db"
 SECRET_KEY="your-secret-key"
 ALGORITHM="HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES=60
@@ -74,84 +66,9 @@ hearders={'Authorization': 'Bearer {token}'}
 * ***Refresh Token*** - *login required*
 
 O token expira em 60 minutos, então faça um post no endpoint abaixo antes do tempo expirar, para permanecer utilizando a aplicação:
->POST /auth/refresh_token'
+>POST /auth/refresh_token
 
-#### Users
-* ***Criar usuario***
-> POST /users/conta
-```
-{
-    'username': 'testusername',
-    'email': 'test@test.com',
-    'password': 'password'
-}
-```
-* ***Deletar usuario*** - *login required*
-> DELETE /users/conta/`{user.id}`
+#### Users, Livro e Romancista
+Utilize o **redoc** para mais informações sobre todas as rotas disponíveis.
 
-* ***Atualizar usuario*** - *login required*
-> UPDATE /users/conta/`{user.id}`
-```
-{           
-    'id': 1,
-    'username': 'test2',
-    'email': 'test2@test.com',
-    'password': 'password'
-}
-```
-#### Romancista
-
-* ***Criar Romancista*** - *login required*
-> POST /romancista
-```
-{
-    'nome': 'test'
-}
-```
-
-* ***Deletar Romancista*** - *login required*
-> DELETE /romancista/`{romancista.id}`
-
-* ***Atualizar romancista*** - *login required*
-> PATCH /romancista/`{romancista.id}`
-```
-{
-    'nome': 'testtest'
-}
-```
-
-
-* ***Listar Romancista por id***
-> GET /romancista/`{romancista.id}`
-
-
-* ***Listar Romancista por queryparam***
-> GET /romancista/?nome=t
-
-
-#### Livro
-
-* ***Criar livro*** - *login required*
-> POST /livro
-```
-{
-    'ano': 1999,
-    'titulo': 'café da manhã dos campeões',
-    'romancista_id': 1      
-}
-```
-* ***Deletar livro*** - *login required*
-> DELETE /livro/`{livro.id}`
-* ***Atualizar livro*** - *login required*
-> PATCH /livro/`{livro.id}`
-```
-{
-    'ano': 1958,
-    'titulo': 'testnomelivro'
-}
-```
-* ***Listar livro por id***
->GET /livro/`{livro.id}`
-
-* ***Listar livro por queryparam***
->GET /livro/?ano=1999&titulo=cafe
+>localhost:8000/redoc

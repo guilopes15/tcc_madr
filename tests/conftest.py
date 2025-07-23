@@ -2,9 +2,9 @@ import random
 
 import factory
 import pytest
+import pytest_asyncio
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from testcontainers.postgres import PostgresContainer
 
 from madr.app import app
@@ -31,19 +31,18 @@ class LivroFactory(factory.Factory):
 
 @pytest.fixture(scope='session')
 def engine():
-    with PostgresContainer('postgres:16', driver='psycopg2') as postgres:
-        engine = create_engine(postgres.get_connection_url())
-        with engine.begin():
-            yield engine
+    with PostgresContainer('postgres:17', driver='psycopg') as postgres:
+        yield create_async_engine(postgres.get_connection_url())
 
 
-@pytest.fixture
-def session(engine):
-    table_registry.metadata.create_all(engine)
-    with Session(engine) as session:
+@pytest_asyncio.fixture
+async def session(engine):
+    async with engine.begin() as conn:
+        await conn.run_sync(table_registry.metadata.create_all)
+    async with AsyncSession(engine, expire_on_commit=False) as session:
         yield session
-
-    table_registry.metadata.drop_all(engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(table_registry.metadata.drop_all)
 
 
 @pytest.fixture
@@ -57,8 +56,8 @@ def client(session):
     app.dependency_overrides.clear()
 
 
-@pytest.fixture
-def user(session):
+@pytest_asyncio.fixture
+async def user(session):
     password = '123'
     user = User(
         username='test',
@@ -67,14 +66,14 @@ def user(session):
     )
 
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    await session.commit()
+    await session.refresh(user)
     user.clean_password = password
     return user
 
 
-@pytest.fixture
-def other_user(session):
+@pytest_asyncio.fixture
+async def other_user(session):
     password = '321'
     user = User(
         username='test1',
@@ -83,8 +82,8 @@ def other_user(session):
     )
 
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    await session.commit()
+    await session.refresh(user)
     user.clean_password = password
     return user
 
@@ -101,43 +100,43 @@ def token(client, user):
     return response.json()['access_token']
 
 
-@pytest.fixture
-def romancista(session):
+@pytest_asyncio.fixture
+async def romancista(session):
     romancista = Romancista(nome='test')
     session.add(romancista)
-    session.commit()
-    session.refresh(romancista)
+    await session.commit()
+    await session.refresh(romancista)
     return romancista
 
 
-@pytest.fixture
-def other_romancista(session):
+@pytest_asyncio.fixture
+async def other_romancista(session):
     other_romancista = Romancista(nome='test1')
     session.add(other_romancista)
-    session.commit()
-    session.refresh(other_romancista)
+    await session.commit()
+    await session.refresh(other_romancista)
     return other_romancista
 
 
-@pytest.fixture
-def livro(session, romancista):
+@pytest_asyncio.fixture
+async def livro(session, romancista):
     livro = Livro(
         ano=1999,
         titulo='o mundo assombrado pelos demônios',
         romancista_id=romancista.id,
     )
     session.add(livro)
-    session.commit()
+    await session.commit()
 
     return livro
 
 
-@pytest.fixture
-def other_livro(session, romancista):
+@pytest_asyncio.fixture
+async def other_livro(session, romancista):
     livro = Livro(
         ano=1999, titulo='otherlivrotitulo', romancista_id=romancista.id
     )
     session.add(livro)
-    session.commit()
+    await session.commit()
 
     return livro
