@@ -10,5 +10,5 @@ app.include_router(livro.router)
 
 
 @app.get('/')
-def read_root():
-    return {'message': 'test'}
+async def read_root():
+    return {'message': 'Hello World'}

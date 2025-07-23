@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from slugify import slugify
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from madr.database import get_session
 from madr.models import Livro, User
@@ -20,12 +20,14 @@ from madr.security import get_current_user
 
 router = APIRouter(prefix='/livro', tags=['livro'])
 T_CurrentUser = Annotated[User, Depends(get_current_user)]
-T_Session = Annotated[Session, Depends(get_session)]
+T_Session = Annotated[AsyncSession, Depends(get_session)]
 
 
 @router.post('/', status_code=HTTPStatus.OK, response_model=LivroPublic)
-def create_livro(livro: LivroSchema, session: T_Session, user: T_CurrentUser):
-    db_livro = session.scalar(
+async def create_livro(
+    livro: LivroSchema, session: T_Session, user: T_CurrentUser
+):
+    db_livro = await session.scalar(
         select(Livro).where(Livro.titulo == livro.titulo)
     )
     if db_livro:
@@ -40,8 +42,8 @@ def create_livro(livro: LivroSchema, session: T_Session, user: T_CurrentUser):
     )
 
     session.add(db_livro)
-    session.commit()
-    session.refresh(db_livro)
+    await session.commit()
+    await session.refresh(db_livro)
 
     return db_livro
 
@@ -49,16 +51,16 @@ def create_livro(livro: LivroSchema, session: T_Session, user: T_CurrentUser):
 @router.delete(
     '/{livro_id}', status_code=HTTPStatus.OK, response_model=Message
 )
-def delete_livro(livro_id: int, session: T_Session, user: T_CurrentUser):
-    db_livro = session.scalar(select(Livro).where(Livro.id == livro_id))
+async def delete_livro(livro_id: int, session: T_Session, user: T_CurrentUser):
+    db_livro = await session.scalar(select(Livro).where(Livro.id == livro_id))
 
     if not db_livro:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail='Livro nao consta no MADR'
         )
 
-    session.delete(db_livro)
-    session.commit()
+    await session.delete(db_livro)
+    await session.commit()
 
     return {'message': 'Livro deletado no MADR'}
 
@@ -66,10 +68,10 @@ def delete_livro(livro_id: int, session: T_Session, user: T_CurrentUser):
 @router.patch(
     '/{livro_id}', status_code=HTTPStatus.OK, response_model=LivroPublic
 )
-def patch_livro(
+async def patch_livro(
     livro_id: int, session: T_Session, user: T_CurrentUser, livro: LivroUpdate
 ):
-    db_livro = session.scalar(select(Livro).where(Livro.id == livro_id))
+    db_livro = await session.scalar(select(Livro).where(Livro.id == livro_id))
 
     if not db_livro:
         raise HTTPException(
@@ -82,8 +84,8 @@ def patch_livro(
 
         db_livro.titulo = slugify(db_livro.titulo, separator=' ')
         session.add(db_livro)
-        session.commit()
-        session.refresh(db_livro)
+        await session.commit()
+        await session.refresh(db_livro)
 
     except IntegrityError:
         raise HTTPException(
@@ -97,8 +99,8 @@ def patch_livro(
 @router.get(
     '/{livro_id}', status_code=HTTPStatus.OK, response_model=LivroPublic
 )
-def get_livro_by_id(livro_id: int, session: T_Session):
-    db_livro = session.scalar(select(Livro).where(Livro.id == livro_id))
+async def get_livro_by_id(livro_id: int, session: T_Session):
+    db_livro = await session.scalar(select(Livro).where(Livro.id == livro_id))
 
     if not db_livro:
         raise HTTPException(
@@ -109,7 +111,7 @@ def get_livro_by_id(livro_id: int, session: T_Session):
 
 
 @router.get('/', status_code=HTTPStatus.OK, response_model=LivroList)
-def list_livro(
+async def list_livro(
     session: T_Session,
     ano: int | None = None,
     titulo: str | None = None,
@@ -124,6 +126,6 @@ def list_livro(
     if titulo:
         query = query.filter(Livro.titulo.contains(titulo))
 
-    list_livros = session.scalars(query.offset(offset).limit(limit)).all()
+    list_livros = await session.scalars(query.offset(offset).limit(limit))
 
-    return {'livros': list_livros}
+    return {'livros': list_livros.all()}

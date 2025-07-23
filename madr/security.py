@@ -7,7 +7,7 @@ from jwt import decode, encode
 from jwt.exceptions import ExpiredSignatureError, PyJWTError
 from pwdlib import PasswordHash
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from zoneinfo import ZoneInfo
 
 from madr.database import get_session
@@ -38,8 +38,8 @@ def create_access_token(data: dict):
     return encode_jwt
 
 
-def get_current_user(
-    session: Session = Depends(get_session),
+async def get_current_user(
+    session: AsyncSession = Depends(get_session),
     token: str = Depends(oauth2_scheme),
 ):
     credentials_exception = HTTPException(
@@ -63,7 +63,7 @@ def get_current_user(
     except PyJWTError:
         raise credentials_exception
 
-    user = session.scalar(select(User).where(User.email == username))
+    user = await session.scalar(select(User).where(User.email == username))
 
     if not user:
         raise credentials_exception

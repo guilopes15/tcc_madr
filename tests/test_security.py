@@ -39,23 +39,25 @@ def test_jwt_invalid_token(client):
     assert response.json() == {'detail': 'Could not validate credentials'}
 
 
-def test_get_current_user_not_found(session):
+@pytest.mark.asyncio
+async def test_get_current_user_not_found(session):
     data = {'sub': 'None@none.com'}
     token = encode(data, Settings().SECRET_KEY, algorithm=Settings().ALGORITHM)
 
     with pytest.raises(HTTPException) as ex:
-        get_current_user(session, token)
+        await get_current_user(session, token)
 
     assert ex.value.status_code == HTTPStatus.UNAUTHORIZED
     assert ex.value.detail == 'Could not validate credentials'
 
 
-def test_get_current_user_without_sub(session):
+@pytest.mark.asyncio
+async def test_get_current_user_without_sub(session):
     data = {}
     token = encode(data, Settings().SECRET_KEY, algorithm=Settings().ALGORITHM)
 
     with pytest.raises(HTTPException) as ex:
-        get_current_user(session, token)
+        await get_current_user(session, token)
 
     assert ex.value.status_code == HTTPStatus.UNAUTHORIZED
     assert ex.value.detail == 'Could not validate credentials'
